@@ -4,4 +4,4 @@ Convert JSON to CSV
 
 ## Run
 
-Set the variables `Constants.JSON_FILE` and `Constants.CSV_FILE` to corresponding values
+Set the variables in `Constants.java` to corresponding values
