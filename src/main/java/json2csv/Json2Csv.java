@@ -14,9 +14,7 @@ import com.opencsv.CSVWriter;
 
 public class Json2Csv {
 
-    static String[] header={ "Position", "Activity", "Count" };
-    static String rootElement="key";
-
+    
     public static void main(String[] args) throws Exception {
         InputStream fis = new FileInputStream(Constants.JSON_FILE);
         FileWriter outputfile = new FileWriter(Constants.CSV_FILE);
@@ -24,24 +22,35 @@ public class Json2Csv {
         JsonReader reader = Json.createReader(fis);
         CSVWriter writer = new CSVWriter(outputfile);
         
-        JsonArray positionArray = reader.readArray();
+        JsonArray jsonArray = reader.readArray();
         
         reader.close();
-        writer.writeNext(header);
+        writer.writeNext(Constants.HEADER);
 
-        for (JsonValue positionValue : positionArray) {
-            JsonObject position = positionValue.asJsonObject();
+        for (JsonValue jsonValue : jsonArray) {
+            JsonObject jsonObject = jsonValue.asJsonObject();
 
-            String positionName = position.getString(rootElement);
-            JsonArray activityArray =position.getJsonObject("distinctActivities").getJsonArray("buckets");
-
-            for (JsonValue jsonValue : activityArray) {
-                String activity = jsonValue.asJsonObject().getString("key");
-                int count = jsonValue.asJsonObject().getInt("doc_count");
-                String[] data={positionName,activity,String.valueOf(count)};
-                writer.writeNext(data);
-            
+            String column1 = jsonObject.getString(Constants.ROOT_ELEMENT);
+            if(jsonObject.containsKey("distinctValues"))
+            {
+                JsonArray column2 =jsonObject.getJsonObject("distinctValues").getJsonArray("buckets");
+                for (JsonValue distinctValue : column2) {
+                    String col2value = distinctValue.asJsonObject().getString("key");
+                    int count = distinctValue.asJsonObject().getInt(Constants.COUNT_FIELD);
+                    String[] data={column1,col2value,String.valueOf(count)};
+                    writer.writeNext(data);
+                
+                }
             }
+            else {
+                int column2 = jsonObject.getInt(Constants.COUNT_FIELD);
+                String[] data={column1,String.valueOf(column2)};
+                writer.writeNext(data);
+                
+            }
+            
+
+            
         }
         writer.close();
     }
