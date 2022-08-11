@@ -1,6 +1,6 @@
 package json2csv;
 public class Constants {
-    static String JSON_FILE="/media/chandni/DATA/Work/iGOT/elasticsearch/metrics/json2csv.json";
-    static String CSV_FILE="/media/chandni/DATA/Work/iGOT/elasticsearch/metrics/json2csv.csv";
+    static String JSON_FILE=<path to input JSON file>;
+    static String CSV_FILE=<path to output CSV file>;
     
 }
