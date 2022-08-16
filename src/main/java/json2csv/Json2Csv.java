@@ -10,6 +10,8 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.opencsv.CSVWriter;
 
 public class Json2Csv {
@@ -25,33 +27,59 @@ public class Json2Csv {
         JsonArray jsonArray = reader.readArray();
         
         reader.close();
-        writer.writeNext(Constants.HEADER);
+        //writer.writeNext(Constants.HEADER);
+
+        
+        String column0;
 
         for (JsonValue jsonValue : jsonArray) {
             JsonObject jsonObject = jsonValue.asJsonObject();
 
-            String column1 = jsonObject.getString(Constants.ROOT_ELEMENT);
+            column0 = jsonObject.getString(Constants.ROOT_ELEMENT);
+            String[] csvRow= {column0};
             if(jsonObject.containsKey("distinctValues"))
             {
                 JsonArray column2 =jsonObject.getJsonObject("distinctValues").getJsonArray("buckets");
-                for (JsonValue distinctValue : column2) {
-                    String col2value = distinctValue.asJsonObject().getString("key");
-                    int count = distinctValue.asJsonObject().getInt(Constants.COUNT_FIELD);
-                    String[] data={column1,col2value,String.valueOf(count)};
-                    writer.writeNext(data);
-                
-                }
+                convertDistinctValuesToCSV(writer,csvRow,column2);
+                //csvRow = ArrayUtils.addAll(csvRow,data);
             }
             else {
                 int column2 = jsonObject.getInt(Constants.COUNT_FIELD);
-                String[] data={column1,String.valueOf(column2)};
-                writer.writeNext(data);
-                
+                String[] data={String.valueOf(column2)};
+                csvRow = ArrayUtils.addAll(csvRow, data);
+                writer.writeNext(csvRow);
             }
             
 
             
         }
         writer.close();
+    }
+
+    static void convertDistinctValuesToCSV(CSVWriter writer ,String[] csvRow,JsonArray jsonArray) {
+          
+        String[] row = csvRow;
+
+     for (JsonValue distinctValue : jsonArray) {
+            JsonObject jsonObject = distinctValue.asJsonObject();
+            String[] data={distinctValue.asJsonObject().getString("key")} ;
+            //int count = distinctValue.asJsonObject().getInt(Constants.COUNT_FIELD);
+            if(jsonObject.containsKey("distinctValues"))
+            {
+                JsonArray column2 =jsonObject.getJsonObject("distinctValues").getJsonArray("buckets");
+                convertDistinctValuesToCSV(writer,(String[]) ArrayUtils.addAll(row,data),column2);
+                
+            }
+            else{
+                csvRow=(String[]) ArrayUtils.addAll(row,data);
+                writer.writeNext(csvRow);
+            }
+            
+            
+            
+        
+        }
+            
+        
     }
 }
