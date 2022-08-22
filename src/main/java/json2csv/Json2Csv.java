@@ -3,6 +3,7 @@ package json2csv;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -49,9 +50,6 @@ public class Json2Csv {
                 csvRow = ArrayUtils.addAll(csvRow, data);
                 writer.writeNext(csvRow);
             }
-            
-
-            
         }
         writer.close();
     }
@@ -60,10 +58,10 @@ public class Json2Csv {
           
         String[] row = csvRow;
 
-     for (JsonValue distinctValue : jsonArray) {
+        for (JsonValue distinctValue : jsonArray) {
             JsonObject jsonObject = distinctValue.asJsonObject();
             String[] data={distinctValue.asJsonObject().getString("key")} ;
-            //int count = distinctValue.asJsonObject().getInt(Constants.COUNT_FIELD);
+            int count = distinctValue.asJsonObject().getInt(Constants.COUNT_FIELD);
             if(jsonObject.containsKey("distinctValues"))
             {
                 JsonArray column2 =jsonObject.getJsonObject("distinctValues").getJsonArray("buckets");
@@ -72,14 +70,12 @@ public class Json2Csv {
             }
             else{
                 csvRow=(String[]) ArrayUtils.addAll(row,data);
-                writer.writeNext(csvRow);
+                String[] rowToWrite = new String[ csvRow.length+1];
+                for(int i=0;i<csvRow.length;i++)
+                    rowToWrite[i]=csvRow[i];
+                rowToWrite[csvRow.length] = String.valueOf(count);
+                writer.writeNext(rowToWrite);
             }
-            
-            
-            
-        
         }
-            
-        
     }
 }
